@@ -1,0 +1,141 @@
+// Type declarations
+.type Modifier = symbol
+.type Type = symbol
+.type Method = symbol
+.type Var = symbol
+.type Value = symbol
+.type Instruction = symbol
+.type Field = symbol
+.type HeapAllocation = Value
+.type MethodInvocation = Instruction
+
+.decl ConcreteEdge(invocation:symbol, receiver:symbol, callee:Method, signature:symbol)
+
+// Define our taint analysis relations
+.decl TaintSource(var:symbol)
+.decl TaintSink(var:symbol)
+.decl Tainted(var:symbol)
+.decl TaintFlow(from:symbol, to:symbol)
+.decl TaintedField(base:symbol, field:symbol)
+.decl TaintedArray(base:symbol)
+
+// New relations for field-based taint sources
+.decl SourceField(field:symbol)
+.decl MethodReturnsField(method:Method, field:symbol)
+.decl TaintedByFieldSource(var:symbol, field:symbol)
+
+// Rules for method call edges
+ConcreteEdge(invocation, "", callee, signature) :-
+    _StaticMethodInvocation(invocation, _, callee, signature).
+
+ConcreteEdge(invocation, base, callee, signature) :-
+    _SpecialMethodInvocation(invocation, _, callee, base, signature).
+
+ConcreteEdge(invocation, base, callee, signature) :-
+    _VirtualMethodInvocation(invocation, _, callee, base, signature).
+
+// Rules for taint propagation
+// Rule 1: Direct assignment propagates taint
+Tainted(to) :-
+    _AssignLocal(_, _, from, to, _),
+    Tainted(from).
+
+// Rule 2: Method parameters propagate taint
+TaintFlow(from, param) :-
+    _ActualParam(_, invocation, param),
+    Tainted(from).
+
+// New Rule 2.1: Propagate taint to formal parameters
+Tainted(param) :-
+    TaintFlow(from, param),
+    _FormalParam(_, _, param).
+
+// Rule 3: Return values from methods with tainted parameters are tainted
+Tainted(to) :-
+    _AssignReturnValue(invocation, to),
+    _ActualParam(_, invocation, param),
+    Tainted(param).
+
+// Rule 4: Sources are tainted
+Tainted(var) :-
+    TaintSource(var).
+
+// Rule 5: Field store propagates taint
+TaintedField(base, field) :-
+    _StoreInstanceField(_, _, from, base, field, _),
+    Tainted(from).
+
+// Rule 6: Field load propagates taint
+Tainted(to) :-
+    _LoadInstanceField(_, _, to, base, field, _),
+    TaintedField(base, field).
+
+// Rule 7: Array store propagates taint
+TaintedArray(base) :-
+    _StoreArrayIndex(_, _, from, base, _),
+    Tainted(from).
+
+// Rule 8: Array load propagates taint
+Tainted(to) :-
+    _LoadArrayIndex(_, _, to, base, _),
+    TaintedArray(base).
+
+// Rule 9-11: Method calls propagate taint through parameters
+TaintFlow(actual, formal) :-
+    _ActualParam(index, invocation, actual),
+    ConcreteEdge(invocation, _, callee, _),
+    _FormalParam(index, callee, formal),
+    Tainted(actual).
+
+// Rule 12: Report flows to sinks
+.decl TaintViolation(source:symbol, sink:symbol)
+TaintViolation(source, sink) :-
+    Tainted(sink),
+    TaintSink(sink),
+    TaintFlow(source, sink).
+
+// Rule 13: Direct field access becomes tainted if field is a source
+Tainted(to), TaintedByFieldSource(to, field) :-
+    _LoadInstanceField(_, _, to, base, field, _),
+    SourceField(field).
+
+// Rule 14: Track methods that return source fields (corrected version)
+MethodReturnsField(method, field) :-
+    _Method(method, _, _, _, _, _, _),
+    _LoadInstanceField(_, _, to, _, field, method),
+    _Return(_,_,to, method),
+    SourceField(field).
+
+// Rule 15: Static method return values are tainted if method returns a source field
+Tainted(to), TaintedByFieldSource(to, field) :-
+    _AssignReturnValue(invocation, to),
+    _StaticMethodInvocation(invocation, _, callee, _),
+    MethodReturnsField(callee, field),
+    SourceField(field).
+
+// Rule 16: Virtual method return values are tainted if method returns a source field
+Tainted(to), TaintedByFieldSource(to, field) :-
+    _AssignReturnValue(invocation, to),
+    _VirtualMethodInvocation(invocation, _, callee, _, _),
+    MethodReturnsField(callee, field),
+    SourceField(field).
+
+// Rule 17: Special method return values are tainted if method returns a source field
+Tainted(to), TaintedByFieldSource(to, field) :-
+    _AssignReturnValue(invocation, to),
+    _SpecialMethodInvocation(invocation, _, callee, _, _),
+    MethodReturnsField(callee, field),
+    SourceField(field).
+
+// Define source fields
+SourceField(field) :- field="<com.ss.android.ugc.aweme.profile.model.User: java.lang.String nickname>".
+
+// Output declarations
+.output Tainted
+.output TaintFlow
+.output TaintViolation
+.output TaintedField
+.output TaintedArray
+.output TaintedByFieldSource
+.output MethodReturnsField
+.output ConcreteEdge
