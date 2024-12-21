@@ -13,7 +13,7 @@ def bubble_sort(arr):
 # 示例使用
 if __name__ == "__main__":
     # 测试数组
-    test_array = [64, 34, 25, 12, 22, 11, 90]
+    test_array = [11, 12, 13, 14444, 1333333, 2222222]
     print("原始数组:", test_array)
 
     # 进行排序
