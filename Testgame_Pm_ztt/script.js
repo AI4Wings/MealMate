@@ -23,6 +23,7 @@ let score = 0;
 let level = 1;
 let isPaused = false;
 let isDualMode = false; // 双方块模式 | Dual Block Mode
+let isHistoryVisible = false; // 历史记录显示状态 | History Display State
 let gameBoard = Array(ROWS).fill().map(() => Array(COLS).fill(0));
 let currentPiece = null;
 let nextPiece = null;
@@ -75,10 +76,21 @@ document.addEventListener('DOMContentLoaded', () => {
     nextPieceCanvas = document.getElementById('nextPiece');
     nextPieceCtx = nextPieceCanvas.getContext('2d');
     
+    // 模式选择按钮事件监听 | Mode Selection Button Event Listeners
+    document.getElementById('singleModeSelect').addEventListener('click', () => {
+        isDualMode = false;
+        startNewGame();
+    });
+    
+    document.getElementById('dualModeSelect').addEventListener('click', () => {
+        isDualMode = true;
+        startNewGame();
+    });
+    
     document.getElementById('startButton').addEventListener('click', startGame);
     document.getElementById('pauseButton').addEventListener('click', togglePause);
     document.getElementById('exitButton').addEventListener('click', exitGame);
-    document.getElementById('dualModeButton').addEventListener('click', toggleDualMode);
+    document.getElementById('recordsButton').addEventListener('click', toggleHistory);
     document.addEventListener('keydown', handleKeyPress);
 });
 
@@ -234,8 +246,34 @@ function gameOver() {
     ctx.fillText('最终得分 | Final Score: ' + score, canvas.width / 2, canvas.height / 2 + 20);
     document.getElementById('startButton').textContent = '重新开始 | Restart';
     
+    // 返回模式选择界面 | Return to mode selection screen
+    setTimeout(() => {
+        document.getElementById('modeSelection').style.display = 'block';
+        document.getElementById('gameContent').style.display = 'none';
+        document.querySelector('.history-section').style.display = 'none';
+    }, 2000);
+    
     // Add game to history
     addHistoryRecord();
+}
+
+// 开始新游戏 | Start New Game
+function startNewGame() {
+    document.getElementById('modeSelection').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+    document.querySelector('.history-section').style.display = 'none';
+    isHistoryVisible = false;
+    startGame();
+}
+
+// 切换历史记录显示 | Toggle History Display
+function toggleHistory() {
+    isHistoryVisible = !isHistoryVisible;
+    const historySection = document.querySelector('.history-section');
+    historySection.style.display = isHistoryVisible ? 'block' : 'none';
+    if (isHistoryVisible) {
+        updateHistoryDisplay();
+    }
 }
 
 // 暂停/继续游戏 | Pause/Resume Game
