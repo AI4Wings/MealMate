@@ -8,13 +8,31 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="game-header">
+        <!-- 模式选择界面 | Mode Selection Screen -->
+        <div id="modeSelection" class="mode-selection">
             <h1>俄罗斯方块 | Tetris</h1>
-            <div class="score-container">
-                <div class="score">分数 | Score: <span id="score">0</span></div>
-                <div class="level">等级 | Level: <span id="level">1</span></div>
+            <h2>选择游戏模式 | Select Game Mode</h2>
+            <div class="mode-buttons">
+                <button id="singleModeSelect" class="mode-select-button">
+                    单方块模式<br>Single Block Mode
+                    <div class="mode-description">适合初学者的经典玩法<br>Classic gameplay for beginners</div>
+                </button>
+                <button id="dualModeSelect" class="mode-select-button">
+                    双方块模式<br>Dual Block Mode
+                    <div class="mode-description">挑战性更高的双方块玩法<br>Advanced gameplay with dual blocks</div>
+                </button>
             </div>
         </div>
+        
+        <!-- 游戏主界面 | Game Main Screen -->
+        <div id="gameContent" class="game-content" style="display: none;">
+            <div class="game-header">
+                <h1>俄罗斯方块 | Tetris</h1>
+                <div class="score-container">
+                    <div class="score">分数 | Score: <span id="score">0</span></div>
+                    <div class="level">等级 | Level: <span id="level">1</span></div>
+                </div>
+            </div>
         <div class="game-area">
             <canvas id="tetris" width="300" height="600"></canvas>
             <div class="game-info">
@@ -29,10 +47,22 @@
                     <p>↓ 加速下落 | Speed Up</p>
                     <p>↑ 旋转 | Rotate</p>
                     <p>空格 暂停 | Space to Pause</p>
+                    <p>D 双方块模式 | Dual Block Mode</p>
+                </div>
+                <div class="history-section">
+                    <h3>历史记录 | History</h3>
+                    <div id="historyList" class="history-list">
+                        <!-- History records will be displayed here -->
+                    </div>
                 </div>
             </div>
         </div>
-        <button id="startButton" class="start-button">开始游戏 | Start Game</button>
+        <div class="button-group">
+            <button id="startButton" class="game-button start-button">开始游戏 | Start Game</button>
+            <button id="pauseButton" class="game-button pause-button">暂停 | Pause</button>
+            <button id="exitButton" class="game-button exit-button">退出 | Exit</button>
+            <button id="recordsButton" class="game-button records-button">我的记录 | My Records</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
