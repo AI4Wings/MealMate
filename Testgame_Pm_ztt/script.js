@@ -303,9 +303,6 @@ function togglePause() {
 // 切换双方块模式 | Toggle Dual Block Mode
 function toggleDualMode() {
     isDualMode = !isDualMode;
-    const dualModeButton = document.getElementById('dualModeButton');
-    dualModeButton.textContent = isDualMode ? '开启 | On' : '关闭 | Off';
-    dualModeButton.classList.toggle('active', isDualMode);
     
     if (currentPiece) {
         if (isDualMode) {
@@ -328,8 +325,6 @@ function exitGame() {
     level = 1;
     isPaused = false;
     isDualMode = false;
-    document.getElementById('dualModeButton').textContent = '关闭 | Off';
-    document.getElementById('dualModeButton').classList.remove('active');
     updateScore();
     
     // Reset UI
@@ -340,16 +335,11 @@ function exitGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     nextPieceCtx.clearRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
     
-    // Draw exit message
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'white';
-    ctx.font = '30px "Noto Sans SC"';
-    ctx.textAlign = 'center';
-    ctx.fillText('游戏已退出 | Game Exited', canvas.width / 2, canvas.height / 2 - 30);
-    ctx.font = '20px "Noto Sans SC"';
-    ctx.fillText('点击开始新游戏', canvas.width / 2, canvas.height / 2 + 20);
-    ctx.fillText('Click to Start New Game', canvas.width / 2, canvas.height / 2 + 50);
+    // Return to mode selection screen | 返回模式选择界面
+    document.getElementById('modeSelection').style.display = 'block';
+    document.getElementById('gameContent').style.display = 'none';
+    document.querySelector('.history-section').style.display = 'none';
+    isHistoryVisible = false;
 }
 
 // 键盘控制 | Keyboard Controls
