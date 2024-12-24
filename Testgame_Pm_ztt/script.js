@@ -316,6 +316,7 @@ function toggleDualMode() {
 }
 
 function exitGame() {
+    console.log('Exiting game...'); // Debug log
     clearInterval(gameLoop);
     currentPiece = null;
     nextPiece = null;
@@ -328,18 +329,22 @@ function exitGame() {
     updateScore();
     
     // Reset UI
+    console.log('Resetting UI elements...'); // Debug log
     document.getElementById('startButton').textContent = '开始游戏 | Start Game';
     document.getElementById('pauseButton').textContent = '暂停 | Pause';
     
     // Clear both canvases
+    console.log('Clearing canvases...'); // Debug log
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     nextPieceCtx.clearRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
     
     // Return to mode selection screen | 返回模式选择界面
+    console.log('Switching to mode selection screen...'); // Debug log
     document.getElementById('modeSelection').style.display = 'block';
     document.getElementById('gameContent').style.display = 'none';
     document.querySelector('.history-section').style.display = 'none';
     isHistoryVisible = false;
+    console.log('Exit complete'); // Debug log
 }
 
 // 键盘控制 | Keyboard Controls
